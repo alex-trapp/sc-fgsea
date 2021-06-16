@@ -1,0 +1,222 @@
+---
+title: "sc-fGSEA"
+output: html_document
+chunk_output_type: inline
+---
+
+
+markers file: output of findAllMarfkers functions from Seurat V3
+
+Changbing the p-value so there is no zero in it
+# p-value transformation: get a rank of all p-values specified, fold change ranking for those that are 0
+# output file from Seurat 
+
+
+#############
+Load packages
+#############
+
+```{r message=FALSE}
+library(fgsea)
+library(dplyr)
+library(hash)
+library(tictoc)
+library(xlsx)
+```
+
+
+############
+Load markers
+############
+
+```{r}
+# read-in input marker table
+S.ALL.markers <- read.table("./data/hglBM.NOmp.markers.clust.txt",
+                            header = TRUE)
+
+# ensure clusters is of datatype double (starting with 1)
+S.ALL.markers$cluster <- as.numeric(S.ALL.markers$cluster)
+
+cluster_list <- sort(unique(S.ALL.markers$cluster))
+
+cat("Unique sorted clusters: ")
+cat(cluster_list)
+cat("\nNumber of clusters: ")
+cat(length((unique(S.ALL.markers$cluster))))
+```
+
+##########
+Load atlas
+##########
+
+```{r}
+# load gmt file with geneset information
+atlas <- gmtPathways("./data/atlasV14.gmt")
+```
+
+
+##################
+P-value processing
+##################
+
+```{r}
+# initialize cluster dataframe dictionaries
+clust_dict <- hash(keys = sprintf("Cluster_%s", cluster_list), values = cluster_list)
+clust_dict_pval <- hash(keys = sprintf("Cluster_%s", cluster_list), values = cluster_list)
+
+# internally rank p-values with a value of 0 based on fold change
+for (x in cluster_list) {
+  cat("\nCluster =", x)
+  
+  # filter dataframe into single celltype elements
+  clusterdf <- dplyr::filter(S.ALL.markers, cluster == x)
+  
+  # add sign column
+  clusterdf$fcSign <- sign(clusterdf$avg_log2FC)
+  
+  # fix p-values equal to 0
+  
+  # first, check if p-values of 0 are detected in given cluster
+  if (0 %in% clusterdf$p_val_adj) { 
+    
+    # if so, count how many such values exist
+    first_nonzero_p <- 0
+    for (p in clusterdf$p_val_adj) {
+      if (p == 0) { 
+        first_nonzero_p <- first_nonzero_p + 1
+      }
+    }
+    
+    cat("\nNumber of (p_val_adj = 0) values:", first_nonzero_p, "\n")
+    
+    # create decreasing sequence from the last nonzero value 
+    # (i.e. zero p-value closest to nonzero p-value)
+    zero_values <- seq(first_nonzero_p, 1, by =-1) 
+    
+    # loop through all zero p-values starting with the one adjacent to nonzero value
+    # for each p-value of 0, divide the previous non-zero value by the reduction
+    # factor. this enable a valid nonzero p-value for each gene in each cluster
+    reduction_factor <- 1.01
+    for (zero_ind in zero_values) {
+      clusterdf$p_val_adj[zero_ind] <- (clusterdf$p_val_adj[zero_ind+1]) / reduction_factor
+    }
+  
+    cat("Modified!\n")  
+  }
+  
+  else { # if there are no non-zero values, all is well
+    cat("\nNo (p-value = 0) genes in this cluster \n")
+  }
+  
+  # add logP column (-log10 transformation of the p-value)
+  clusterdf$logP <- -log10((clusterdf$p_val_adj)) 
+  
+  # add metric column (-log10 p-value with sign information)
+  clusterdf$metric <- clusterdf$logP/clusterdf$fcSign 
+  
+  # assign dataframe as value in hash table to corresponding key ("Cluster_x")
+  clust_dict[[sprintf("Cluster_%s", x)]] <- clusterdf
+  
+  # assign metric/gene vectors in hash table to corresponding key ("Cluster_x")
+  clust_dict_pval[[sprintf("Cluster_%s", x)]] <- setNames(clusterdf$metric, clusterdf$gene)
+}
+```
+
+
+#####
+fgsea
+#####
+
+```{r, warning=FALSE}
+
+# initialize hash dictionary to store fgsea results
+fgsea_dict <- hash(keys = sprintf("Cluster_%s", cluster_list), values = cluster_list)
+
+for (clust in cluster_list) {
+  tic(sprintf("Cluster %s runtime", clust))
+  
+  # run fgsea analysis
+  fgsea_dict[[sprintf("Cluster_%s", clust)]] <- fgsea(pathways = atlas, 
+                                                      stats = clust_dict_pval[[sprintf("Cluster_%s", clust)]], 
+                                                      nperm = 100000)
+  
+  # add cluster label column to the generated dataframe
+  fgsea_dict[[sprintf("Cluster_%s", clust)]]$cluster <- rep(sprintf("%s", clust), 
+                                                            dim(fgsea_dict[[sprintf("Cluster_%s",
+                                                                                    clust)]])[1])
+  toc()
+}
+```
+
+
+##################
+combine dataframes
+##################
+
+```{r}
+# initialize a dataframe containing data for the first cluster/celltype
+first_cluster_df = fgsea_dict[[sprintf("Cluster_%s", cluster_list[1])]]
+
+# use rbind to progressively add clusters to this dataframe
+for (clust in cluster_list[-1]) {
+  first_cluster_df <- rbind(first_cluster_df, fgsea_dict[[sprintf("Cluster_%s", clust)]])
+}
+
+# dataframe with all clusters combined
+head(first_cluster_df, 3)
+```
+
+##########################
+transform leadingEdge data
+##########################
+
+```{r}
+# copy previous dataframe
+final_cluster_df_modLE <- first_cluster_df
+
+# loop through every row of this dataframe to fix leadingEdge problem
+for (row in 1:nrow(final_cluster_df_modLE)) {
+  
+  # get list of leading edge genes as a string
+  leading_Edge_character = as.character(final_cluster_df_modLE[row, leadingEdge])
+  
+  # modify output string to remove unecessary components
+  
+  # remove "
+  new_string_v1 <- gsub('"', "", leading_Edge_character, fixed = TRUE)
+  
+  # remove (
+  new_string_v2 <- gsub("(", "", new_string_v1, fixed = TRUE)
+  
+  # remove )
+  new_string_v3 <- gsub(")", "", new_string_v2, fixed = TRUE)
+  
+  # remove c
+  new_string_v4 <- gsub("c", "", new_string_v3, fixed = TRUE)
+  
+  # set leadingEdge column to the new transformed strings
+  final_cluster_df_modLE[row, "leadingEdge"] = new_string_v4
+}
+
+# Changes the final datatype to character to allow export
+final_cluster_df_modLE$leadingEdge <- as.character(final_cluster_df_modLE$leadingEdge)
+
+# final modified gsea dataframe before export
+head(final_cluster_df_modLE, 3)
+```
+
+###############
+export to excel
+###############
+
+```{r}
+sheet_name = "hglBM"
+output_path = "./output/hglBM.cluster.markers.output.xlsx"
+
+write.xlsx(final_cluster_df_modLE, 
+           output_path,
+           sheetName = sheet_name,
+           row.names = FALSE)
+
+cat("Output file written to Excel!")
+```
