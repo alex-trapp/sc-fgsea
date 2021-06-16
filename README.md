@@ -4,7 +4,7 @@ sc-fgsea is an automated tool for cluster annotation of single-cell RNA sequenci
 
 The documented code for sc-fgsea is provided as an R markdown file, which can easily be loaded into RStudio.
 
-## Data
+## Input
 
 Required data files (located in the `data` folder) are also provided to run the tool and reproduce the analysis.
 
@@ -16,7 +16,11 @@ Example markers and atlas files are provided in `data`:
 * atlasV14.gmt
 * hglBM.NOmp.markers.clust.txt
 
-The output of sc-fgsea is an Excel file, containing p-values and enrichment scores for each geneset and each cluster in the input files. An example output file can be found in the `output` folder, with the following format:
+Note: some genes in the markers file may contain p-values of 0, resulting from underflow errors during processing. To address this, genes with p-values of 0 are ranked in a cluster-wise basis by their fold change, and p-values of these genes are modified to be non-zero while preserving the integrity of the rank. This enables piping our markers data into fgsea.
+
+## Output
+
+The output of sc-fgsea is an Excel file, containing p-values and enrichment scores for each geneset/cluster pair from the input marker file and atlas. An example output file (`hglBM.cluster.markers.output.xlsx`) can be found in the `output` folder, with the following format:
 
 pathway |	pval | padj |	ES | NES | nMoreExtreme | size | leadingEdge | cluster |
 :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
