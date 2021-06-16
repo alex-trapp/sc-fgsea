@@ -1,8 +1,8 @@
 # sc-fgsea
 
-sc-fgsea is an automated tool for cluster annotation of single-cell RNA sequencing data. The tool runs on the fGSEA framework and leverages cell-type specific genesets to enable itterative, supervised cluster annotation based on computed p-values and enrichment scores.
+sc-fgsea is an automated tool for cluster annotation of single-cell RNA sequencing data. The tool runs on the fGSEA framework and leverages cell-type specific genesets to enable itterative, supervised annotation based on computed p-values and enrichment scores.
 
-The documented code for sc-fgsea is provided as an R markdown file, which can easily be loaded into and run with RStudio.
+The documented code for sc-fgsea is provided as an R markdown file, which can easily be loaded into RStudio.
 
 ## Data
 
