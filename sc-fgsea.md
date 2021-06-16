@@ -1,34 +1,36 @@
----
-title: "sc-fgsea"
-author: Alexandre Trapp
-date: June 16, 2021
-output:
-  md_document:
-    variant: markdown_github
----
-
 sc-fgsea v1.0 (6/16/2021)
 
 Developed by Alexandre Trapp
 
-#############
-Load packages
-#############
+############# 
 
-```{r message=FALSE}
+Load packages \#\#\#\#\#\#\#\#\#\#\#\#\#
+
+``` r
 library(fgsea)
 library(dplyr)
+```
+
+    ## Warning: package 'dplyr' was built under R version 4.0.5
+
+``` r
 library(hash)
 library(tictoc)
+```
+
+    ## Warning: package 'tictoc' was built under R version 4.0.5
+
+``` r
 library(xlsx)
 ```
 
+    ## Warning: package 'xlsx' was built under R version 4.0.5
 
-############
-Load markers
-############
+############ 
 
-```{r}
+Load markers \#\#\#\#\#\#\#\#\#\#\#\#
+
+``` r
 # read-in input marker table
 S.ALL.markers <- read.table("./data/hglBM.NOmp.markers.clust.txt",
                             header = TRUE)
@@ -39,26 +41,43 @@ S.ALL.markers$cluster <- as.numeric(S.ALL.markers$cluster)
 cluster_list <- sort(unique(S.ALL.markers$cluster))
 
 cat("Number of clusters: ")
+```
+
+    ## Number of clusters:
+
+``` r
 cat(length((unique(S.ALL.markers$cluster))))
+```
+
+    ## 14
+
+``` r
 cat("\nList: ")
+```
+
+    ## 
+    ## List:
+
+``` r
 cat(cluster_list)
 ```
 
-##########
-Load atlas
-##########
+    ## 1 2 3 4 5 6 7 8 9 10 11 12 13 14
 
-```{r}
+########## 
+
+Load atlas \#\#\#\#\#\#\#\#\#\#
+
+``` r
 # load gmt file with geneset information
 atlas <- gmtPathways("./data/atlasV14.gmt")
 ```
 
+################## 
 
-##################
-P-value processing
-##################
+P-value processing \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
 
-```{r}
+``` r
 # initialize cluster dataframe dictionaries
 clust_dict <- hash(keys = sprintf("Cluster_%s", cluster_list), values = cluster_list)
 clust_dict_pval <- hash(keys = sprintf("Cluster_%s", cluster_list), values = cluster_list)
@@ -121,13 +140,66 @@ for (x in cluster_list) {
 }
 ```
 
+    ## 
+    ## Cluster = 1
+    ## Number of (p_val_adj = 0) values: 137 
+    ## Modified!
+    ## 
+    ## Cluster = 2
+    ## No (p-value = 0) genes in this cluster 
+    ## 
+    ## Cluster = 3
+    ## Number of (p_val_adj = 0) values: 179 
+    ## Modified!
+    ## 
+    ## Cluster = 4
+    ## Number of (p_val_adj = 0) values: 1 
+    ## Modified!
+    ## 
+    ## Cluster = 5
+    ## No (p-value = 0) genes in this cluster 
+    ## 
+    ## Cluster = 6
+    ## Number of (p_val_adj = 0) values: 161 
+    ## Modified!
+    ## 
+    ## Cluster = 7
+    ## Number of (p_val_adj = 0) values: 179 
+    ## Modified!
+    ## 
+    ## Cluster = 8
+    ## Number of (p_val_adj = 0) values: 574 
+    ## Modified!
+    ## 
+    ## Cluster = 9
+    ## Number of (p_val_adj = 0) values: 30 
+    ## Modified!
+    ## 
+    ## Cluster = 10
+    ## Number of (p_val_adj = 0) values: 4 
+    ## Modified!
+    ## 
+    ## Cluster = 11
+    ## Number of (p_val_adj = 0) values: 93 
+    ## Modified!
+    ## 
+    ## Cluster = 12
+    ## Number of (p_val_adj = 0) values: 135 
+    ## Modified!
+    ## 
+    ## Cluster = 13
+    ## Number of (p_val_adj = 0) values: 14 
+    ## Modified!
+    ## 
+    ## Cluster = 14
+    ## Number of (p_val_adj = 0) values: 79 
+    ## Modified!
 
-#####
-fgsea
-#####
+##### 
 
-```{r, warning=FALSE}
+fgsea \#\#\#\#\#
 
+``` r
 # initialize hash dictionary to store fgsea results
 fgsea_dict <- hash(keys = sprintf("Cluster_%s", cluster_list), values = cluster_list)
 
@@ -147,12 +219,26 @@ for (clust in cluster_list) {
 }
 ```
 
+    ## Cluster 1 runtime: 30.38 sec elapsed
+    ## Cluster 2 runtime: 31.79 sec elapsed
+    ## Cluster 3 runtime: 24.97 sec elapsed
+    ## Cluster 4 runtime: 29.17 sec elapsed
+    ## Cluster 5 runtime: 23.55 sec elapsed
+    ## Cluster 6 runtime: 23.78 sec elapsed
+    ## Cluster 7 runtime: 24.1 sec elapsed
+    ## Cluster 8 runtime: 23.06 sec elapsed
+    ## Cluster 9 runtime: 20.64 sec elapsed
+    ## Cluster 10 runtime: 20.53 sec elapsed
+    ## Cluster 11 runtime: 24.86 sec elapsed
+    ## Cluster 12 runtime: 21.91 sec elapsed
+    ## Cluster 13 runtime: 22.79 sec elapsed
+    ## Cluster 14 runtime: 20.77 sec elapsed
 
-##################
-Combine dataframes
-##################
+################## 
 
-```{r}
+Combine dataframes \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
+
+``` r
 # initialize a dataframe containing data for the first cluster/celltype
 first_cluster_df = fgsea_dict[[sprintf("Cluster_%s", cluster_list[1])]]
 
@@ -165,11 +251,21 @@ for (clust in cluster_list[-1]) {
 head(first_cluster_df, 3)
 ```
 
-##########################
-Transform leadingEdge data
-##########################
+    ##         pathway         pval         padj         ES       NES nMoreExtreme
+    ## 1:   EBERT_hHSC 8.292888e-01 0.8845294543 -0.4376689 -0.747799        36530
+    ## 2:    EBERT_hBC 1.329628e-05 0.0005647463  0.7081955  2.496312            0
+    ## 3: EBERT_hCD34+ 3.449820e-01 0.5593397688  0.3999120  1.103458        23494
+    ##    size                               leadingEdge cluster
+    ## 1:    2                                    SPINK2       1
+    ## 2:   17 MS4A1,CD79B,HLA-DQA1,CD79A,LY86,BANK1,...       1
+    ## 3:    8                  SYPL1,BCL11A,RPL41,RPL31       1
 
-```{r}
+########################## 
+
+Transform leadingEdge data
+\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
+
+``` r
 # copy previous dataframe
 final_cluster_df_modLE <- first_cluster_df
 
@@ -204,11 +300,28 @@ final_cluster_df_modLE$leadingEdge <- as.character(final_cluster_df_modLE$leadin
 head(final_cluster_df_modLE, 3)
 ```
 
-###############
-Export to Excel
-###############
+    ##         pathway         pval         padj         ES       NES nMoreExtreme
+    ## 1:   EBERT_hHSC 8.292888e-01 0.8845294543 -0.4376689 -0.747799        36530
+    ## 2:    EBERT_hBC 1.329628e-05 0.0005647463  0.7081955  2.496312            0
+    ## 3: EBERT_hCD34+ 3.449820e-01 0.5593397688  0.3999120  1.103458        23494
+    ##    size
+    ## 1:    2
+    ## 2:   17
+    ## 3:    8
+    ##                                                                                           leadingEdge
+    ## 1:                                                                                             SPINK2
+    ## 2: MS4A1, CD79B, HLA-DQA1, CD79A, LY86, BANK1, HLA-DMB, RALGPS2, BLNK, HLA-DOB, CD37, CD40, CR2, CD22
+    ## 3:                                                                        SYPL1, BCL11A, RPL41, RPL31
+    ##    cluster
+    ## 1:       1
+    ## 2:       1
+    ## 3:       1
 
-```{r}
+############### 
+
+Export to Excel \#\#\#\#\#\#\#\#\#\#\#\#\#\#\#
+
+``` r
 sheet_name = "hglBM"
 output_path = "./output/hglBM.cluster.markers.output.xlsx"
 
@@ -219,3 +332,5 @@ write.xlsx(final_cluster_df_modLE,
 
 cat("Output file written to Excel!")
 ```
+
+    ## Output file written to Excel!
