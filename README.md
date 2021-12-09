@@ -4,7 +4,7 @@ sc-fgsea is an automated tool for cluster annotation of single-cell RNA sequenci
 
 The documented code for sc-fgsea is provided as an R markdown file, which can easily be loaded into RStudio.
 
-This tool was developed by Alexandre Trapp within the context of the [Emmrich et al preprint on bioRxiv](https://www.biorxiv.org/content/10.1101/2021.08.01.454652v1):
+This tool was developed by Alexandre Trapp within the context of the [Emmrich et al. preprint on bioRxiv](https://www.biorxiv.org/content/10.1101/2021.08.01.454652v1):
 
 ```
 Naked mole-rat hematopoietic stem and progenitors are highly quiescent with an inherent myeloid bias
