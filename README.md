@@ -1,10 +1,10 @@
 # sc-fgsea
 
-sc-fgsea is an automated tool for cluster annotation of single-cell RNA sequencing data. The tool runs on the fGSEA framework and leverages cell-type specific genesets to enable itterative, supervised annotation based on computed p-values and enrichment scores.
+sc-fgsea performs cluster annotation of single-cell RNA sequencing data. The tool runs on the [fGSEA framework](https://bioconductor.org/packages/release/bioc/html/fgsea.html) and leverages existing cell-type specific genesets to enable itterative, supervised annotation based on computed p-values and enrichment scores.
 
 The documented code for sc-fgsea is provided as an R markdown file, which can easily be loaded into RStudio.
 
-This tool was developed by Alexandre Trapp within the context of the [Emmrich et al, 2022](https://www.embopress.org/doi/abs/10.15252/embj.2021109694):
+This tool was developed by Alexandre Trapp in the context of [Emmrich et al (2022)](https://www.embopress.org/doi/abs/10.15252/embj.2021109694):
 
 ```
 Characterization of naked mole-rat hematopoiesis reveals unique stem and progenitor cell patterns and neotenic traits
