@@ -4,14 +4,13 @@ sc-fgsea is an automated tool for cluster annotation of single-cell RNA sequenci
 
 The documented code for sc-fgsea is provided as an R markdown file, which can easily be loaded into RStudio.
 
-This tool was developed by Alexandre Trapp within the context of the [Emmrich et al. preprint on bioRxiv](https://www.biorxiv.org/content/10.1101/2021.08.01.454652v1):
+This tool was developed by Alexandre Trapp within the context of the [Emmrich et al, 2022](https://www.embopress.org/doi/abs/10.15252/embj.2021109694):
 
 ```
-Naked mole-rat hematopoietic stem and progenitors are highly quiescent with an inherent myeloid bias
-Stephan Emmrich, Alexandre Trapp, Frances Tolibzoda Zakusilo, Marco Mariotti, Maggie E. Straight,
-Zhihui Zhang, Spencer Gray, Michael G. Drage, Zhonghe Ke, Masaki Takasugi, Jan-Henning Klusmann,
-Vadim N. Gladyshev, Andrei Seluanov, Vera Gorbunova
-bioRxiv 2021.08.01.454652
+Characterization of naked mole-rat hematopoiesis reveals unique stem and progenitor cell patterns and neotenic traits
+Stephan Emmrich, Alexandre Trapp, Frances Tolibzoda Zakusilo, Maggie E Straight, Albert K Ying, Alexander Tyshkovskiy,
+Marco Mariotti, Spencer Gray, Zhihui Zhang, Michael G Drage, Masaki Takasugi, Jan-Henning Klusmann, Vadim N Gladyshev,
+Andrei Seluanov, Vera Gorbunova
 ```
 
 ## Input
